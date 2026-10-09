@@ -47,7 +47,7 @@
 - `demo_data/meals_sample.json`：补齐 `discountType` 结构化字段，并**刻意保留**两类反例（`tags:["麦金卡"]+discountType=null`、`discountType="早餐卡优惠"`）与「随单购麦金卡优惠」样例。
 - `demo_data/price_sample.json`：重生成使四条路径满足**自洽三式**（Σsubtotal==price / Σ(originalSubtotal−subtotal)==discount / 带-不带随单购差额==withOrderCents）。
 - `whitelist.py`：语义修正——把 `mall-order-*` 等**只读但越界**工具从「写操作」集合拆到 `OUT_OF_SCOPE_TOOLS`（保守拒绝方向不变，表述更准确）。
-- 文档一致性（严把关 P1-1）：`docs/02-design.md` 的 ADR-01 / §1 / §4 / §12.2 已就地改为「脚本层前置守卫 + 留痕；架构级不可达依赖 SKILL.md 硬规则 + 平台 Hook」，与 §14.2 保持一致。
+- 文档一致性（reviewer P1-1）：`docs/02-design.md` 的 ADR-01 / §1 / §4 / §12.2 已就地改为「脚本层前置守卫 + 留痕；架构级不可达依赖 SKILL.md 硬规则 + 平台 Hook」，与 §14.2 保持一致。
 
 ### Security
 - Token **仅经环境变量注入**（`mcp_servers.json` / `mcp-config.example.json` 仅占位符），仓库无明文（RL-11）。
@@ -74,10 +74,10 @@
   - `report.render()`：冲突时标题改「实测实付对照（**不作优劣结论**）」，**省额不给数字**（实付仍给）；
   - `goldcard_rules.detect_identity_conflict()` / `evaluate_with_guards(calc_responses=...)`：
     合并**菜单侧 RL-17** 与**算价侧 RL-23** 两类信号。
-  - ⚠️ **无本账号真机样本**（真机三次试算 `enjoyed` 恒缺省）→ 记 `assumptions.md` **H8【待验证假设】**，
+  - ⚠️ **无测试账号真机样本**（真机三次试算 `enjoyed` 恒缺省）→ 记 `assumptions.md` **H8【待验证假设】**，
     代码注释写明「未经真机取证，走保守降级」。
 - **`scripts/envelope.py` · 空数据中文文案识别（P0-B）**：接口无数据时返回**中文文案**而非空数组
-  （本账号 `query-my-coupons` 实测返回「暂无可用优惠券」）。新增 `looks_empty_text()`；命中且无法解析 JSON 时
+  （测试账号 `query-my-coupons` 实测返回「暂无可用优惠券」）。新增 `looks_empty_text()`；命中且无法解析 JSON 时
   返回 `success=True, data=[], code="EMPTY_TEXT", msg=<原文>, _empty=True`，**不再**误报 `PARSE_ERROR`。
 
 **5 条新红线（RL-23 ~ RL-27，红线总数 22 → 27）**
@@ -122,7 +122,7 @@
 - **解析指引**（README / SKILL / L3）：优先 `structuredContent`，`content[0].text` 仅兜底。
 - **防御性解析**（README / SKILL / L3）：`query-meals` 结构漂移 → 缺字段走降级标注而非崩溃。
 - `references/assumptions.md`：新增 **H8–H16**，其中 H8–H12/H15/H16 标 **【待验证假设】**，
-  H14（空中文文案）标 **已验证（本账号实测）**；并说明 `feature_flags` 只解析 H1–H7、
+  H14（空中文文案）标 **已验证（测试账号实测）**；并说明 `feature_flags` 只解析 H1–H7、
   H8–H16 已**硬编码保守分支**（有意不做成可切换开关，防误切换后虚报数字）。
 - `references/red-lines.md`：新增 RL-23~RL-27 条目 + RL-23 判定/降级表；计数 22 → 27（🔴16 + 🟡10 + 阶段内 1）。
 - `references/L3-semantic-bridge.md`：新增 11 条映射（enjoyed 双关、身份折扣处置、券有效期、券型、
@@ -138,14 +138,14 @@
 ### Fixed
 
 - **P0-B**：空数据中文文案（如「暂无可用优惠券」）由 `PARSE_ERROR` 误报修正为
-  `success=True, data=[], code="EMPTY_TEXT"`（本账号**必踩路径**）。
+  `success=True, data=[], code="EMPTY_TEXT"`（测试账号**必踩路径**）。
 - **P0-A**：`price_compare._coupon_saving_cents()` 原**无条件**把 `enjoyed.discountCents` /
   `enjoyed.realDiscount` 当券省额计入 —— 账号带员工卡时会把身份折扣当成「本单省了多少」，
   并吞掉「与麦金卡互斥」的事实。现经 `identity_guard` 分类后才决定是否计入（🔴RL-23）。
 - `goldcard_rules._self_identity_discount()` 原**只扫菜单 meals、不扫算价响应** —— 现由
   `detect_identity_conflict()` 合并两侧信号，算价侧缺口补齐。
 
-### Fixed（v1.1.0 评审后补修 · 齐回归 NE-03 / NE-14 / NE-20 / NE-04）
+### Fixed（v1.1.0 评审后补修 · eval-engine NE-03 / NE-14 / NE-20 / NE-04）
 
 > 这 4 条是 `04-eval` 断言跑批暴露的**真实缺口**，全部修复在 **1.1.0 发布前**，
 > 故**不另开版本号**（1.1.0 尚未发布，按 SemVer 折叠进同一版本的 `Fixed` 段落）；

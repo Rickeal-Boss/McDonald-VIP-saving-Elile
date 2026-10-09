@@ -1,0 +1,12 @@
+{
+  "_note": "MCP 声明。Token 仅经环境变量注入（占位符），禁止写入明文（RL-11）。",
+  "mcpServers": {
+    "mcd-mcp": {
+      "type": "streamablehttp",
+      "url": "https://mcp.mcd.cn",
+      "headers": {
+        "Authorization": "Bearer ${MCD_MCP_TOKEN}"
+      }
+    }
+  }
+}
