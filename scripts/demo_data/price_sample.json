@@ -1,0 +1,103 @@
+{
+  "_note": "离线 demo 样例数据 —— calculate-price 结果形态，非真实调用。金额单位为分（RL-02）。务必满足自洽三式：① Σ(单品 subtotal)==price；② Σ(originalSubtotal−subtotal)==discount；③ 带/不带随单购差额==随单购项价。",
+  "_consistency_contract": {
+    "formula_1": "Σ(productList[].subtotal) == price",
+    "formula_2": "Σ(productList[].originalSubtotal − productList[].subtotal) == discount",
+    "formula_3": "price(bundle) − price(bare same cart) == withOrderCents == 随单购项 subtoal",
+    "note": "卡/券路径满足 ①②；随单购路径三条同时满足（随单购项作为一行 productList）。"
+  },
+  "cart_bare": {
+    "note": "不带随单购的基准购物车：巨无霸 ×1 = 2600 分",
+    "items": [{ "productCode": "1100", "quantity": 1, "subtotal": 2600 }],
+    "price": 2600
+  },
+  "storeCode": "10000000",
+  "paths": [
+    {
+      "path_id": "pathA_goldcard",
+      "label": "路径A·卡专享 SKU",
+      "source": "goldcard",
+      "ops_count": 1,
+      "data": {
+        "success": true,
+        "price": 2800,
+        "productPrice": 2800,
+        "originalPrice": 5800,
+        "productOriginalPrice": 5800,
+        "discount": 3000,
+        "withOrder": null,
+        "productList": [
+          { "productCode": "9900000001", "originalSubtotal": 5800, "subtotal": 2800 }
+        ]
+      },
+      "items": [{ "code": "9900000001", "name": "人气超值四件套随心选", "quantity": 1 }]
+    },
+    {
+      "path_id": "pathB_plain",
+      "label": "路径B·菜单原价单点",
+      "source": "plain",
+      "ops_count": 1,
+      "data": {
+        "success": true,
+        "price": 2600,
+        "productPrice": 2600,
+        "originalPrice": 2600,
+        "productOriginalPrice": 2600,
+        "discount": 0,
+        "withOrder": null,
+        "productList": [
+          { "productCode": "1100", "originalSubtotal": 2600, "subtotal": 2600 }
+        ]
+      },
+      "items": [{ "code": "1100", "name": "巨无霸", "quantity": 1 }]
+    },
+    {
+      "path_id": "pathB_coupon",
+      "label": "路径B·门店券（巨无霸立减）",
+      "source": "coupon",
+      "ops_count": 2,
+      "_comment": "样例将『立减券』建模为直接降低现价 → 并入 discount（券生效字段 enjoyed 属 missing evidence，未实测）。故 ① 2100==price 且 ② 2600−2100==discount=500 同时成立。",
+      "data": {
+        "success": true,
+        "price": 2100,
+        "productPrice": 2100,
+        "originalPrice": 2600,
+        "productOriginalPrice": 2600,
+        "discount": 500,
+        "withOrder": null,
+        "productList": [
+          { "productCode": "1100", "originalSubtotal": 2600, "subtotal": 2100 }
+        ]
+      },
+      "items": [{ "code": "1100", "name": "巨无霸", "quantity": 1 }]
+    },
+    {
+      "path_id": "pathB_bundle_trap",
+      "label": "路径B·含随单购（陷阱，须剔除）",
+      "source": "coupon",
+      "ops_count": 3,
+      "_comment": "随单购（¥19 麦金卡月卡 = 1900 分）会抬高实付；strip_bundle 扣除 withOrderCents 后回到 2600。三条自洽式：① 2600+1900==4500；② 0+0==discount=0；③ 4500−2600==1900。",
+      "data": {
+        "success": true,
+        "price": 4500,
+        "productPrice": 2600,
+        "originalPrice": 2600,
+        "productOriginalPrice": 2600,
+        "discount": 0,
+        "withOrder": {
+          "cardId": "GOLDCARD_MONTHLY",
+          "cardType": 1,
+          "membershipCode": "MCD_GOLD_MONTH",
+          "membershipSpecId": "SPEC_MONTH_30D",
+          "priceCents": 1900
+        },
+        "withOrderCents": 1900,
+        "productList": [
+          { "productCode": "1100", "originalSubtotal": 2600, "subtotal": 2600 },
+          { "productCode": "9900010999", "originalSubtotal": 1900, "subtotal": 1900, "isWithOrder": true }
+        ]
+      },
+      "items": [{ "code": "1100", "name": "巨无霸", "quantity": 1 }]
+    }
+  ]
+}

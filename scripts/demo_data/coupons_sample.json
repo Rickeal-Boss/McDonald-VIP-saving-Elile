@@ -1,0 +1,115 @@
+{
+  "_note": "离线 demo 样例数据 —— 门店维度可用券（query-store-coupons 形态），非真实调用。用于演示：去重、早餐券时段过滤、渠道过滤、无凭证码券剔除（防 600012）、券有效期（过期剔除 / 临期告警 / 格式未知保守保留）、券型归一化（含积分商城 bundle_price 与未知券型）。",
+  "_validity_placeholder": "样例中 validTo 以『@now+Nd/Nh』相对标记表达（demo.py 在运行时解析为实际时间），以保证 demo 可重复跑通；真实接口返回的是绝对时间字符串。",
+  "storeCode": "10000000",
+  "orderType": 1,
+  "beType": 1,
+  "coupons": [
+    {
+      "couponId": "C001",
+      "couponCode": "CPN001",
+      "name": "巨无霸立减券",
+      "couponType": "立减",
+      "voucherProductCode": "1100",
+      "boundProductCode": "1100",
+      "timeWindow": "all",
+      "channel": "instore",
+      "validTo": "@now+30d",
+      "usable": true
+    },
+    {
+      "couponId": "C001",
+      "couponCode": "CPN001",
+      "name": "巨无霸立减券（重复投放）",
+      "couponType": "立减",
+      "voucherProductCode": "1100",
+      "timeWindow": "all",
+      "channel": "instore",
+      "validTo": "@now+30d"
+    },
+    {
+      "couponId": "C002",
+      "couponCode": "CPN002",
+      "name": "早餐满减券（非早餐时段应剔除）",
+      "couponType": "满减",
+      "voucherProductCode": "1100",
+      "timeWindow": "breakfast",
+      "channel": "instore",
+      "validTo": "@now+15d"
+    },
+    {
+      "couponId": "C003",
+      "couponCode": "CPN003",
+      "name": "无凭证码券（不可试算，防 600012）",
+      "couponType": "满减",
+      "timeWindow": "all",
+      "channel": "instore",
+      "validTo": "@now+15d"
+    },
+    {
+      "couponId": "C004",
+      "couponCode": "CPN004",
+      "name": "麦乐送专享券（渠道不符应剔除）",
+      "couponType": "满减",
+      "voucherProductCode": "1100",
+      "timeWindow": "all",
+      "channel": "delivery",
+      "validTo": "@now+15d"
+    },
+    {
+      "couponId": "C005",
+      "couponCode": "CPN005",
+      "name": "已过期券（应剔除并给 reason）",
+      "couponType": "满减",
+      "voucherProductCode": "1100",
+      "timeWindow": "all",
+      "channel": "instore",
+      "validTo": "@now-2d",
+      "_case": "CL-B01 券有效期：已过期 → 剔除并落 reason（不静默丢弃）"
+    },
+    {
+      "couponId": "C006",
+      "couponCode": "CPN006",
+      "name": "临期券（≤1 天到期，应置顶告警）",
+      "couponType": "满减",
+      "voucherProductCode": "1100",
+      "timeWindow": "all",
+      "channel": "instore",
+      "validTo": "@now+10h",
+      "_case": "CL-B02 券有效期：临期 → expiring_soon=True，报告置顶告警（外部调研 #34：9 张券里 2 张当日到期）"
+    },
+    {
+      "couponId": "C007",
+      "couponCode": "CPN007",
+      "name": "有效期格式无法解析券（保守保留 + validity_unknown）",
+      "couponType": "折扣",
+      "voucherProductCode": "1100",
+      "timeWindow": "all",
+      "channel": "instore",
+      "validTo": "长期有效",
+      "_case": "CL-B03 券有效期：格式不可解析 → 保守保留并标 validity_unknown（RL-07 不臆造）"
+    },
+    {
+      "couponId": "C008",
+      "couponCode": "CPN008",
+      "name": "积分商城组合价券（bundle_price）",
+      "couponType": "bundle_price",
+      "voucherProductCode": "1100",
+      "timeWindow": "all",
+      "channel": "instore",
+      "validTo": "@now+20d",
+      "_case": "CL-B04 券型归一化：积分商城 bundle_price → 归一为 bundle_price（外部调研 #9/#127：券型 ≥7 种，不止满减）"
+    },
+    {
+      "couponId": "C009",
+      "couponCode": "CPN009",
+      "name": "未知券型券（保守保留 + type_unknown，只能实算）",
+      "couponType": "新客专享权益",
+      "voucherProductCode": "1100",
+      "timeWindow": "all",
+      "channel": "instore",
+      "validTo": "@now+20d",
+      "_case": "CL-B05 券型归一化：未知券型 → 保守保留、标 type_unknown，抵扣额只能靠 calculate-price 实算（禁止本地臆造）"
+    }
+  ]
+}

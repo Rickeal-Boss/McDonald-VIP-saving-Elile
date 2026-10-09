@@ -1,0 +1,95 @@
+{
+  "_note": "离线 demo 样例数据 —— 非真实 MCP 调用，输出时必须标注『样例』(RL-19)。字段形态对齐真机 query-meals：价格为元(字符串)，卡权益以单品 discountType 结构化标识。含两类反例（tags 启发式 / 早餐卡优惠）与随单购样例。",
+  "storeCode": "10000000",
+  "storeName": "样例门店（虚构）",
+  "businessStatus": true,
+  "businessEndTime": "23:00",
+  "beType": 1,
+  "orderType": 1,
+  "timeSlot": "lunch",
+  "categories": [
+    {
+      "name": "麦金卡专享",
+      "meals": [
+        {
+          "code": "9900000001",
+          "name": "人气超值四件套随心选",
+          "currentPrice": "28",
+          "originalPrice": "58",
+          "discountType": "麦金卡优惠",
+          "canWithOrder": false,
+          "tags": ["爆款"]
+        }
+      ]
+    },
+    {
+      "name": "人气热卖",
+      "meals": [
+        {
+          "code": "9900000002",
+          "name": "龙焰美味四件套",
+          "currentPrice": "29",
+          "originalPrice": "58",
+          "discountType": "麦金卡优惠",
+          "canWithOrder": false,
+          "tags": [],
+          "_case": "CL-A02 跨分类：分类=人气热卖 但 discountType=麦金卡优惠，必须命中"
+        },
+        {
+          "code": "9900016309",
+          "name": "龙焰鸡腿堡四件套（启发式反例）",
+          "currentPrice": "29",
+          "originalPrice": "58",
+          "discountType": null,
+          "canWithOrder": false,
+          "tags": ["麦金卡"],
+          "_case": "CL-A03 反例：仅 tags=[麦金卡] 且 discountType=null → 不得判为卡权益（RL-15）"
+        }
+      ]
+    },
+    {
+      "name": "单品",
+      "meals": [
+        {
+          "code": "1100",
+          "name": "巨无霸",
+          "currentPrice": "26",
+          "originalPrice": "26",
+          "discountType": null,
+          "canWithOrder": false,
+          "tags": ["经典"],
+          "_case": "CL-A07 普通 SKU：不得套卡价"
+        },
+        {
+          "code": "900001",
+          "name": "麦咖啡（中杯）",
+          "currentPrice": "9.9",
+          "originalPrice": "13",
+          "discountType": "麦金卡优惠",
+          "canWithOrder": false,
+          "tags": ["上新"]
+        },
+        {
+          "code": "9900010999",
+          "name": "麦金卡月卡（随单购加购项）",
+          "currentPrice": "19",
+          "originalPrice": "19",
+          "discountType": "随单购麦金卡优惠",
+          "canWithOrder": true,
+          "tags": [],
+          "_case": "CL-A05 随单购：discountType=随单购麦金卡优惠 → 默认不勾选、不计入到手价（RL-04）"
+        },
+        {
+          "code": "9900010888",
+          "name": "早餐双堡套餐（早餐卡）",
+          "currentPrice": "15",
+          "originalPrice": "25",
+          "discountType": "早餐卡优惠",
+          "canWithOrder": false,
+          "tags": [],
+          "_case": "CL-A06 反例：discountType=早餐卡优惠 ≠ 麦金卡 → 不计入卡路径"
+        }
+      ]
+    }
+  ]
+}

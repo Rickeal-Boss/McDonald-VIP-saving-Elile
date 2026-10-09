@@ -1,0 +1,36 @@
+{
+  "_note": "离线 demo 样例数据 —— 【身份折扣场景】calculate-price 结果形态，非真实调用。用于演示 🔴RL-23：data.enjoyed 为**身份折扣**（员工卡 7.5 折）时，不得当券省额计入。⚠️ 本场景为**构造样例**：测试账号真机三次试算 enjoyed 恒缺省，无真机样本（假设 H8，见 references/assumptions.md）。",
+  "_consistency_contract": {
+    "formula_1": "Σ(productList[].subtotal) == price",
+    "formula_2": "Σ(originalSubtotal − subtotal) == discount",
+    "note": "本文件仅一条路径，①② 均须成立：1950 == price；2600−1950 == discount == 650。"
+  },
+  "storeCode": "10000000",
+  "paths": [
+    {
+      "path_id": "pathX_identity",
+      "label": "路径X·员工卡身份折扣",
+      "source": "goldcard",
+      "ops_count": 1,
+      "_comment": "员工卡 7.5 折把 2600 降到 1950 → discount=650（身份折扣已体现在现价里）。enjoyed 同时出现且 promotionName=员工卡优惠（realDiscount=6.5 元）。若把 enjoyed 再计一次券省额 → 省额虚报为 1300 分，且掩盖『与麦金卡替换而非叠加』的事实。RL-23 守卫必须把它拦下（coupon_saving_cents=0）。",
+      "data": {
+        "success": true,
+        "price": 1950,
+        "productPrice": 1950,
+        "originalPrice": 2600,
+        "productOriginalPrice": 2600,
+        "discount": 650,
+        "withOrder": null,
+        "enjoyed": {
+          "promotionName": "员工卡优惠",
+          "type": "identity",
+          "realDiscount": 6.5
+        },
+        "productList": [
+          { "productCode": "1100", "originalSubtotal": 2600, "subtotal": 1950 }
+        ]
+      },
+      "items": [{ "code": "1100", "name": "巨无霸", "quantity": 1 }]
+    }
+  ]
+}
