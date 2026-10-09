@@ -1,0 +1,12 @@
+{
+  "_note": "官方必交文件（README 未列，仅 activityGuidelines 列出）。只能使用占位符，禁止真实 Token。",
+  "mcpServers": {
+    "mcd-mcp": {
+      "type": "streamablehttp",
+      "url": "https://mcp.mcd.cn",
+      "headers": {
+        "Authorization": "Bearer <YOUR_MCD_MCP_TOKEN>"
+      }
+    }
+  }
+}
